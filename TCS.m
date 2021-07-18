@@ -1,4 +1,4 @@
-function Ans = TCS(kap)
+function Ans = TCS(kap,showplot,initial)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %parameters goes here
@@ -13,6 +13,14 @@ kd3 = 0.5;
 kb3 = 0.5;
 tf = 10000;
 
+KC=1e-3;
+KF=1e-3;
+KF4=20e-3;
+kG=1;
+kR=1;
+kdG=;
+kdR=;
+%kap = 0.0033.*Na/(Na+0.1463)
 %EnvZPR= EnvZP.OmpR etc.
 EnvZPi=0;
 EnvZPRi=0;
@@ -21,11 +29,12 @@ EnvZRi=0;
 OmpRPi=0;
 EnvZi=0.17;
 OmpRi=6;
-initial = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi];
+%initial = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi];
 opt=odeset('RelTol',1e-10,'Events',@reachSS,'NonNegative',1);
 [tt, NN] = ode45(@f, [0; tf], initial,opt);
 
-Ans=tt(end,:);
+Ans=NN(end,:);
+if(showplot)
 hold on;
 figure(1);
 plot(tt,NN(:,1));
@@ -36,11 +45,11 @@ plot(tt,NN(:,5));
 plot(tt,NN(:,6));
 plot(tt,NN(:,7));
 xlabel('Time / s');
-ylabel('Number of moles/\mumol');
+ylabel('Number of moles/\muM');
 legend('EnvZ','EnvZP','EnvZP.OmpRP','EnvZ.OmpRP','EnvZ.OmpR','OmpR','OmpRP');
 grid on;
 hold off;
-
+end
     function dxdt=f(t,x)
         EnvZ=x(1);
         EnvZP=x(2);
@@ -56,6 +65,8 @@ hold off;
         dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*OmpR-kd3.*EnvZR;
         dOmpRdt=-kb1.*EnvZP.*OmpR+kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP;
+        %dGFPdt=kG.*kC.*OmpRP/(OmpRP+KC)-kdG;
+        %dRFPdt=kR.*kF.*OmpRP/(OmpRP+KF).*(1-(OmpRP/(OmpRP+KF4)))-kdR;dGFPdt;dRFPdt
         dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt];
     end
 

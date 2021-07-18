@@ -48,8 +48,10 @@ end
         if(EnvZP<=0)
             EnvZP=0;
         end
-        dEnvZdt = (-a.*sodium(iter)+c)./(sodium(iter)+b).*EnvZ+kad.*EnvZP;
-        dEnvZPdt = (a.*sodium(iter)+c)./(sodium(iter)+b).*EnvZ-kad.*EnvZP;
+%         dEnvZdt = (-a.*sodium(iter))./(sodium(iter)+b).*EnvZ.^c+kad.*EnvZP;
+%         dEnvZPdt =(a.*sodium(iter))./(sodium(iter)+b).*EnvZ.^c-kad.*EnvZP;
+        dEnvZdt = (-a.*sodium(iter).*EnvZ.^c)./(EnvZ.^c+kad./(b));
+        dEnvZPdt =(a.*sodium(iter).*EnvZ.^c)./(EnvZ.^c+kad./(b));
         dXdt = [dEnvZdt;dEnvZPdt]; %V2
     end
 end
