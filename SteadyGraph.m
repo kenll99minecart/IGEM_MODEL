@@ -1,6 +1,12 @@
 function resultSS = SteadyGraph(kap1,kap2,scaf1,scaf2,surf1,time)
-%UNTITLED2 Summary of this function goes here
+%recommend: kap2=0.01
 %This program has been running for ... idk PLEASE ALLOCATE TIME FOR 15 MINUTES
+%% Clearing the memory
+close all; % Closes the figures
+clc; % Clears the command window
+hold off
+
+%% default initialization
 %   Default initial
 %For normal TCS
 EnvZPi=0;
@@ -14,6 +20,19 @@ GFPi=0;
 RFPi=0;
 %;GFPi;RFPi
 initial = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi];
+
+%For anti-TCS
+EnvZPi=0;
+EnvZPRi=0;
+EnvZRPi=0;
+EnvZRi=0;
+OmpRPi=0;
+EnvZi=0.1;
+OmpRi=6;
+GFPi=0;
+RFPi=0;
+%;GFPi;RFPi
+initials = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi];
 
 %default initial:
 initialg=zeros(1,9);
@@ -119,16 +138,17 @@ end
 
 
 else %if(time)
-resultSS=zeros(7,31);
-resultSSscaf=zeros(16,31);
-kaprangeSS=linspace(kap1,kap2,31);
+resultSS=zeros(7,101);
+resultSSscaf=zeros(16,101);
+resultanti=zeros(13,101);
+kaprangeSS=linspace(kap1,kap2,101);
 
 %iteration for changing intial guess for TCS
 resultSS(:,1)=TCS(kaprangeSS(1),0,initial,0,initialg);
 initialchange=resultSS(:,1);
 %simulate once using ode45
 
-for i=2:31
+for i=2:101
 % resultSS(:,i)=TCS(kaprangeSS(i),0,initial,1,initialchange);
 % initialchange=resultSS(:,i);
 resultSS(:,i)=TCS(kaprangeSS(i),0,initial,0,initialchange);
@@ -147,13 +167,24 @@ end
 % for i=1:51
 % resultSS(:,i)=TCS(kaprangeSS(i),0,initialg,1,initial);
 % end
-
+resultanti(:,1)=TCSanti(kaprangeSS(1),0,initials,0,initialg);
+initialchange3=resultanti(:,1);
+for i=2:101
+% resultSS(:,i)=TCS(kaprangeSS(i),0,initial,1,initialchange);
+% initialchange=resultSS(:,i);
+resultanti(:,i)=TCSanti(kaprangeSS(i),0,initials,0,initialchange3);
+initialchange3=resultanti(:,i);
+end
 fprintf('done TCS');
 
+%*************************************************
 %iteration for changing intial guess for TCS with scarfold
 resultSSscaf(:,1)=TCSwscar(kaprangeSS(1),0,initial2,0,initial2g);
 %simulate once using ode45
 initialchange2=resultSSscaf(:,1);
+%*************************************************
+
+
 % for i=2:31
 % if(mod(i,10)==0)
 % resultSSscaf(:,i)=TCSwscar(kaprangeSS(i),0,initial2,1,initialchange2);
@@ -164,13 +195,15 @@ initialchange2=resultSSscaf(:,1);
 % 
 % initialchange2=resultSSscaf(:,i);
 % end
-for i=2:31
-%resultSSscaf(:,i)=TCSwscar(kaprangeSS(i),0,initial2,1,initialchange2);
-%initialchange2=resultSSscaf(:,i);
+
+%*************************************************
+for i=2:101 
 resultSSscaf(:,i)=TCSwscar(kaprangeSS(i),0,initial2,0,initialchange2);
 initialchange2=resultSSscaf(:,i);
 count=i
 end
+%**************************************************
+
 % for i=1:51
 % resultSSscaf(:,i)=TCSwscar(kaprangeSS(i),0,initial2,1,initial2g);
 % %TotalEnvZ=initial2(1)+initial2(2)+initial2(3)+initial2(4)+initial2(5)+initial2(9)+initial2(10)+initial2(11)+initial2(12)+initial2(13)-resultSSscaf(1,i)-resultSSscaf(2,i)-resultSSscaf(3,i)-resultSSscaf(4,i)-resultSSscaf(5,i)-resultSSscaf(9,i)-resultSSscaf(10,i)-resultSSscaf(11,i)-resultSSscaf(12,i)-resultSSscaf(13,i)      
@@ -269,6 +302,96 @@ plot(RFPSS,GFPSS,'r',RFPantin,GFPantin,'g',RFPSSF,GFPSSF,'b',RFPanti,GFPanti,'m'
 legend('only TCS','only antisense','only scaffold','scaffold & antisense');
 xlabel('RFP');
 ylabel('GFP');
+
+%% anti2 without scaffold
+GFPanti2=zeros(101,1);
+RFPanti2=zeros(101,1);
+
+EnvZPi=0;
+EnvZPRi=0;
+EnvZRPi=0;
+EnvZRi=0;
+OmpRPi=0;
+EnvZi=0.1;
+OmpRi=6;
+GFPi=0;
+RFPi=0;
+initial3 = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi];
+
+fprintf('now anti2');
+for i=1:101
+Tem=TCSanti2(kaprangeSS(i),0,initial3);
+GFPanti2(i)=Tem(15);
+RFPanti2(i)=Tem(17);
+count=i
+end
+GFPanti2
+RFPanti2
+%figure(12);
+%plot(kaprangeSS,GFPantin,kaprangeSS,RFPantin,kaprangeSS,GFPanti2,kaprangeSS,RFPanti2)
+%legend('GFP with antisense','RFP with antisense','GFP with anti2','RFP with anti2')
+hold off;
+figure(15);
+plot(kaprangeSS,GFPanti2,'g',kaprangeSS,RFPanti2,'r');
+legend('GFP','RFP');
+
+matGFPanti2=[kaprangeSS;GFPanti2'];
+matRFPanti2=[kaprangeSS;RFPanti2'];
+matGFPantin=[kaprangeSS;GFPantin];
+matRFPantin=[kaprangeSS;RFPantin];
+P2=InterX(matGFPanti2,matRFPanti2);
+P1=InterX(matGFPantin,matRFPantin);
+figure(16);
+plot(kaprangeSS,GFPanti2,'g',kaprangeSS,RFPanti2,'r',kaprangeSS,GFPantin,kaprangeSS,RFPantin,P2(1,:),P2(2,:),'bo',P1(1,:),P1(2,:),'ro');
+legend('GFP with anti2','RFP with anti2','GFP with anti','RFP with anti');
+
+P3=InterX([kaprangeSS;GFPSS],[kaprangeSS;RFPSS]);
+figure(17);
+plot(kaprangeSS,GFPanti2,'g',kaprangeSS,RFPanti2,'r',kaprangeSS,GFPSS,kaprangeSS,RFPSS,P2(1,:),P2(2,:),'bo',P3(1,:),P3(2,:),'bo');
+legend('GFP with anti2','RFP with anti2','GFP','RFP');
+
+%% anti2 with scaffold
+GFPanti2scaf=zeros(101,1);
+RFPanti2scaf=zeros(101,1);
+
+EnvZPi=0;
+EnvZPRi=0;
+EnvZRPi=0;
+EnvZRi=0;
+OmpRPi=0;
+EnvZi=0.1;
+OmpRi=6;
+GFPi=0;
+RFPi=0;
+initial4 = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi;Sci;ScEnvZi;ScEnvZPi;ScEnvZPRi;ScEnvZRPi;ScEnvZRi;ScOmpRPi;ScOmpRi;EnvZD;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi];
+
+fprintf('now anti2 with scaffold');
+for i=1:101
+Tem=TCSwscafd2(kaprangeSS(i),0,initial4);
+GFPanti2scaf(i)=Tem(24);
+RFPanti2scaf(i)=Tem(26);
+count=i
+end
+
+hold off;
+figure(18);
+plot(kaprangeSS,GFPanti2scaf,'g',kaprangeSS,RFPanti2scaf,'r');
+legend('GFP with anti2 & scaffold','RFP with anti2 & scaffold');
+
+matGFPanti2scaf=[kaprangeSS;GFPanti2scaf'];
+matRFPanti2scaf=[kaprangeSS;RFPanti2scaf'];
+matGFPanti=[kaprangeSS;GFPanti];
+matRFPanti=[kaprangeSS;RFPanti];
+P4=InterX(matGFPanti2scaf,matRFPanti2scaf);
+P5=InterX(matGFPanti,matRFPanti);
+figure(19);
+plot(kaprangeSS,GFPanti2scaf,'g',kaprangeSS,RFPanti2scaf,'r',kaprangeSS,GFPanti,kaprangeSS,RFPanti,P4(1,:),P4(2,:),'bo',P5(1,:),P5(2,:),'ro');
+legend('GFP with anti2 & scaffold','RFP with anti2 & scaffold','GFP with anti & scaffold','RFP with anti & scaffold');
+
+figure(20);
+plot(kaprangeSS,GFPanti2scaf,'g',kaprangeSS,RFPanti2scaf,'r',kaprangeSS,GFPSS,kaprangeSS,RFPSS,P4(1,:),P4(2,:),'bo',P3(1,:),P3(2,:),'bo');
+legend('GFP with anti2','RFP with anti2','GFP','RFP');
+
 end %if(time)
 end
 

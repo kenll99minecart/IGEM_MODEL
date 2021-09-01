@@ -1,4 +1,4 @@
-function Ans = TCS(kap,showplot,initial,SS,guess)
+function Ans = TCSanti(kap,showplot,initial,SS,guess)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %parameters goes here
@@ -11,7 +11,7 @@ kb2 = 0.5;
 kph =0.025;%0.0015e-6%wrong prev 0.05
 kd3 = 0.5;
 kb3 = 0.5;
-tf = 100000;
+tf = 8000;
 
 KC=20e-3;
 KF=1e-3;
@@ -22,6 +22,10 @@ kC=0.01;
 kF=0.01;
 kdG=0.001;
 kdR=0.001;
+kdGm=1;
+kdRm=1;
+KdG=1e-2;
+KdR=1e-2;
 %kap = 0.0033.*Na/(Na+0.1463)
 %EnvZPR= EnvZP.OmpR etc.
 EnvZPi=0;
@@ -57,6 +61,18 @@ ylabel('Number of moles/\muM');
 legend('EnvZ','EnvZP','EnvZP.OmpRP','EnvZ.OmpRP','EnvZ.OmpR','OmpR','OmpRP');
 grid on;
 hold off;
+figure(2);
+plot(tt,NN(:,8),tt,NN(:,9),tt,NN(:,10),tt,NN(:,11));
+legend('GFPt','RFPt','GFPL','RFPL');
+xlabel('Time / s');
+ylabel('Number of moles/\muM');
+figure(3);
+plot(tt,NN(:,10),tt,NN(:,11));
+legend('GFPL','RFPL');
+xlabel('Time / s');
+ylabel('Number of moles/\muM');
+figure(4);
+plot(tt,NN(:,7)+NN(:,6)+NN(:,5)+NN(:,4)+NN(:,3));
 % figure(2);
 % plot(tt,NN(:,8),'g-',tt,NN(:,9),'r-')
 % xlabel('Time / s');
@@ -71,8 +87,12 @@ end
         EnvZR=x(5);
         OmpR=x(6);
         OmpRP=x(7);
-        %GFP=x(8);
-        %RFP=x(9);
+        GFPt=x(8);
+        RFPt=x(9);
+        GFPL=x(10);
+        RFPL=x(11);
+        GFPp=x(12);
+        RFPp=x(13);
         dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR;
         dEnvZPRdt=kb1.*EnvZP.*(OmpR.^2)-kd1.*EnvZPR-kpt.*EnvZPR;
@@ -81,10 +101,14 @@ end
         dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP;
         %assume constant plasmid number CN
-        %dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;
-        %dRFPdt=kR.*kF.*OmpRP.^2./(OmpRP.^2+KF.^2).*(1-(OmpRP.^2./(OmpRP.^2+KF4.^2)))-kdR.*RFP;
+        dGFPtdt=kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdGm.*GFPt;
+        dRFPtdt=kF.*OmpRP.^2./(OmpRP.^2+KF.^2).*(1-(OmpRP.^2./(OmpRP.^2+KF4.^2)))-kdRm.*RFPt;
+        dGFPLdt=KdG./(KdG+RFPt).*dGFPtdt+GFPt.*(-KdG./(KdG+RFPt).^2).*dRFPtdt;
+        dRFPLdt=KdR./(KdR+GFPt).*dRFPtdt+RFPt.*(-KdR./(KdR+GFPt).^2).*dGFPtdt;
+        dGFPpdt=kG.*GFPL-kdG.*GFPp;
+        dRFPpdt=kG.*RFPL-kdR.*RFPp;
         %;dGFPdt;dRFPdt
-        dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt];
+        dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt;dGFPtdt;dRFPtdt;dGFPLdt;dRFPLdt;dGFPpdt;dRFPpdt];
     end
 
     function [position, isterminal, direction] = reachSS(t, X)
@@ -108,10 +132,10 @@ function dxdt=fSS(t,x)
         RFP=x(9);
         dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*OmpR+kd1.*EnvZPR;
-        dEnvZPRdt=kb1.*EnvZP.*OmpR-kd1.*EnvZPR-kpt.*EnvZPR;
+        dEnvZPRdt=kb1.*EnvZP.*OmpR.^2-kd1.*EnvZPR-kpt.*EnvZPR;
         dEnvZRPdt=kpt.*EnvZPR-kd2.*EnvZRP+kb2.*EnvZ.*OmpRP-kph.*EnvZRP;
         dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*OmpR-kd3.*EnvZR;
-        dOmpRdt=-kb1.*EnvZP.*OmpR+kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
+        dOmpRdt=-2.*kb1.*EnvZP.*OmpR.^2+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP;
         %assume constant plasmid number CN
         dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;
@@ -121,4 +145,3 @@ function dxdt=fSS(t,x)
         dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt;dGFPdt;dRFPdt;TotalEnvZ;TotalOmpR;dGFPdt;dRFPdt];
     end
 end
-

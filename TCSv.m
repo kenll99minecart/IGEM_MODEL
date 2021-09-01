@@ -1,17 +1,17 @@
-function Ans = TCS(kap,showplot,initial,SS,guess)
+function Ans = TCSv(kap,showplot,initial,SS,guess)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %parameters goes here
 kad = 0.0001;%0.001
 kb1 = 0.5;
 kd1 = 0.5;
-kpt= 0.0015; %1.5/0.0015 %need to sensitivity analysis
+kpt= 0.0015; %1.5
 kd2 = 0.5;
 kb2 = 0.5;
-kph =0.025;%0.0015e-6%wrong prev 0.05
+kph =0.05;%0.0015e-6
 kd3 = 0.5;
 kb3 = 0.5;
-tf = 100000;
+tf = 8000;
 
 KC=20e-3;
 KF=1e-3;
@@ -36,9 +36,10 @@ RFPi=0.1;
 %initial = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi;GFPi;RFPi];
 if(~SS)
 opt=odeset('RelTol',1e-5,'NonNegative',1,'Events',@reachSS);%
-[tt, NN] = ode15s(@f, [0; tf], initial,opt);
+[tt, NN] = ode45(@f, [0; tf], initial,opt);
 
 Ans=NN(end,:);
+
 else
 %guess=ones(1,9).*7;
 ops=optimoptions(@fsolve,'FunctionTolerance',1e-20);
@@ -57,11 +58,11 @@ ylabel('Number of moles/\muM');
 legend('EnvZ','EnvZP','EnvZP.OmpRP','EnvZ.OmpRP','EnvZ.OmpR','OmpR','OmpRP');
 grid on;
 hold off;
-% figure(2);
-% plot(tt,NN(:,8),'g-',tt,NN(:,9),'r-')
-% xlabel('Time / s');
-% ylabel('Number of moles/\muM');
-% legend('GFP','RFP');
+figure(2);
+plot(tt,NN(:,8),'g-',tt,NN(:,9),'r-')
+xlabel('Time / s');
+ylabel('Number of moles/\muM');
+legend('GFP','RFP');
 end
     function dxdt=f(t,x)
         EnvZ=x(1);
@@ -74,11 +75,11 @@ end
         %GFP=x(8);
         %RFP=x(9);
         dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
-        dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR;
-        dEnvZPRdt=kb1.*EnvZP.*(OmpR.^2)-kd1.*EnvZPR-kpt.*EnvZPR;
+        dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*OmpR+kd1.*EnvZPR;
+        dEnvZPRdt=kb1.*EnvZP.*OmpR-kd1.*EnvZPR-kpt.*EnvZPR;
         dEnvZRPdt=kpt.*EnvZPR-kd2.*EnvZRP+kb2.*EnvZ.*OmpRP-kph.*EnvZRP;
         dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*OmpR-kd3.*EnvZR;
-        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
+        dOmpRdt=-kb1.*EnvZP.*OmpR+kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP;
         %assume constant plasmid number CN
         %dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;
@@ -89,9 +90,8 @@ end
 
     function [position, isterminal, direction] = reachSS(t, X)
       Changee=abs(f(t, X));
-      maxChange = max(Changee(1:7));
-      %fprintf('SS \n');
-      position = (maxChange < 1e-10) - 0.5;        
+      maxChange = max(Changee(1:7));    
+      position = (maxChange < 1e-5) - 0.5;        
       isterminal = 1;        
       direction = 1;    
     end  
@@ -121,4 +121,3 @@ function dxdt=fSS(t,x)
         dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt;dGFPdt;dRFPdt;TotalEnvZ;TotalOmpR;dGFPdt;dRFPdt];
     end
 end
-
