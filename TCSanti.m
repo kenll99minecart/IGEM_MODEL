@@ -45,11 +45,11 @@ opt=odeset('RelTol',1e-5,'NonNegative',1,'Events',@reachSS);%
 Ans=NN(end,:);
 else
 %guess=ones(1,9).*7;
-ops=optimoptions(@fsolve,'FunctionTolerance',1e-20);
+ops=optimoptions(@fsolve,'FunctionTolerance',1e-5);
 ops2=optimoptions(@lsqnonlin,'FunctionTolerance',1e-20,'MaxIterations',1e10,'MaxFunctionEvaluations',1e10,'StepTolerance',1e-30,'Algorithm','trust-region-reflective');
 t=1000;
-%Ans=fsolve(@(x)fSS(t,x),initial,ops);
-Ans=lsqnonlin(@(x)fSS(t,x),guess,zeros(1,9),[],ops2);
+Ans=fsolve(@(x)fSS(t,x),guess,ops);
+%Ans=lsqnonlin(@(x)fSS(t,x),guess,zeros(1,9),[],ops2);
 end
 
 if(showplot)
@@ -140,8 +140,8 @@ function dxdt=fSS(t,x)
         %assume constant plasmid number CN
         dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;
         dRFPdt=kR.*kF.*OmpRP.^2./(OmpRP.^2+KF.^2).*(1-(OmpRP.^2./(OmpRP.^2+KF4.^2)))-kdR.*RFP;
-        TotalEnvZ=initial(1)+initial(2)+initial(3)+initial(4)+initial(5)-EnvZ-EnvZP-EnvZPR-EnvZRP-EnvZR;
-        TotalOmpR=initial(3)+initial(4)+initial(5)+initial(6)+initial(7)-OmpR-OmpRP-EnvZPR-EnvZRP-EnvZR;
-        dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt;dGFPdt;dRFPdt;TotalEnvZ;TotalOmpR;dGFPdt;dRFPdt];
+        %TotalEnvZ=initial(1)+initial(2)+initial(3)+initial(4)+initial(5)-EnvZ-EnvZP-EnvZPR-EnvZRP-EnvZR;
+        %TotalOmpR=initial(3)+initial(4)+initial(5)+initial(6)+initial(7)-OmpR-OmpRP-EnvZPR-EnvZRP-EnvZR;;TotalEnvZ;TotalOmpR;
+        dxdt=[dEnvZdt;dEnvZPdt;dEnvZPRdt;dEnvZRPdt;dEnvZRdt;dOmpRdt;dOmpRPdt;dGFPdt;dRFPdt];
     end
 end

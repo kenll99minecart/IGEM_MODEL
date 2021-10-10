@@ -1,6 +1,11 @@
 function self_use_ans = Morris()
 %% Program to run
 %236154 615324 365142
+%312456978
+%924178
+%10
+%10
+%7,8
 % This algorithm is an adaptation of the method of Sensitivity Analysis
 % called the Morris method.
 %
@@ -39,12 +44,12 @@ clear all; % Clears the memory
 clc; % Clears the command window
 %% 2) Parameters : Please fill in
 % Number of factors of uncertainty of the function studied :
-nfac=9; 
+nfac=10; 
 % Maximum number of simulation runs :
 % Large number = better estimation of the influence of the factors
 % Recommended value : (number of factors + 1) * 10
 % The algorithm will maybe exceed this value if it is considered necessary
-nsim_max = 100;
+nsim_max = 1000;
 % Function studied :
 % Replace test_function by the name of your function. It must be a 
 % function with one multidimensional input x. x must represent the values 

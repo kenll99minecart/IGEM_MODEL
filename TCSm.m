@@ -2,19 +2,25 @@ function Ans = TCSm(x)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %x=gaminv(x,1,0.1); %assume gamma distribution
-x=unifinv(x,0,1);
+%x=unifinv(x,0,0.1);
 %parameters goes here
-kap=0.1;
-kad = x(1);%0.001
+kap=x(1);
+kad = 1;%0.001
 kb1 = x(2);
-kd1 =x(3);
-kpt=x(4); %1.5/0.0015 %need to sensitivity analysis
-kd2 =x(5);
-kb2 = x(6);
-kph =x(7);%0.0015e-6%wrong prev 0.05
-kd3 = x(8);
-kb3 = x(9);
+kd1 =1;
+kpt=x(3); %1.5/0.0015 %need to sensitivity analysis
+kd2 =1;
+kb2 = x(4);
+kph =x(5);%0.0015e-6%wrong prev 0.05
+kd3 = 1;
+kb3 = x(6);
 tf = 100000;
+
+fdE=x(7);
+fdO=x(8);
+fpE=x(9);
+fpO=x(10);
+
 x
 KC=20e-3;
 KF=1e-3;
@@ -51,12 +57,12 @@ Ans=NN(end,7);
         OmpRP=x(7);
         %GFP=x(8);
         %RFP=x(9);
-        dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
+        dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR-fdE.*EnvZ+fpE;
         dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR;
         dEnvZPRdt=kb1.*EnvZP.*(OmpR.^2)-kd1.*EnvZPR-kpt.*EnvZPR;
         dEnvZRPdt=kpt.*EnvZPR-kd2.*EnvZRP+kb2.*EnvZ.*OmpRP-kph.*EnvZRP;
         dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*OmpR-kd3.*EnvZR;
-        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
+        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR-fdO.*OmpR+fpO;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP;
         %assume constant plasmid number CN
         %dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;

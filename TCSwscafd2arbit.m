@@ -1,4 +1,4 @@
-function Ans = TCSwscafd2(kap,showplot,initial)
+function Ans = TCSwscafd2arbit(kap,showplot,initial,KF,KF4)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %parameters goes here
@@ -45,8 +45,8 @@ GFPi=0;
 %'RelTol',1e-10,
 
 KC=20e-3;
-KF=1e-3;
-KF4=20e-3;
+%KF=1e-3;
+%KF4=20e-3;
 kG=0.01;%*60
 kR=1;%*60
 kC=0.01;
@@ -123,7 +123,7 @@ legend('OmpRP+ Sc.OmpRP');
 
 
 end
-    function dxdt=f(t,x)
+   function dxdt=f(t,x)
         EnvZ=x(1);
         EnvZP=x(2);
         EnvZPR=x(3);
@@ -198,4 +198,3 @@ end
       direction = 1;    
     end 
 end
-

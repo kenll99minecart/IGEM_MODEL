@@ -5,8 +5,8 @@ table=Morris();
 data=table(:,2:end);
 data_num=table(:,1);
 data(data==-1)=0;
-mean_num=zeros(9,1);
-sd_num=zeros(9,1);
+mean_num=zeros(10,1);
+sd_num=zeros(10,1);
 for i=1:size(data,1)
 mean_num(i)=mean(abs(nonzeros(data(i,:))));
 sd_num(i)=std(nonzeros(data(i,:)));

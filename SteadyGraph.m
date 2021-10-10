@@ -68,75 +68,6 @@ kaprange=linspace(kap1,kap2,datapoints);
 results=zeros(9,datapoints);
 resultsScar=zeros(18,datapoints);
 if(time)
-%first iteration for normal
-results(:,1)=TCS(kaprange(1),0,initial,0);
-initial3=results(:,1);
-%for loop
-for i = 2:datapoints
-results(:,i)=TCS(kaprange(i),0,initial3,0);
-initial3=results(:,i);
-
-end
-
-%first iteration for scaffold
-resultsScar(:,1)=TCSwscar(kaprange(1),0,initial2,0);
-initial4=resultsScar(:,1);
-%for loop
-for i = 2:datapoints
-resultsScar(:,i)=TCSwscar(kaprange(i),0,initial4,0);
-initial4=resultsScar(:,i);
-
-end
-%20:20-20:30 10 fucking minutes
-Varscar=zeros(17,10);
-%for loop
-initial2(8)=0;
-for i = 1:10
-Varscar(:,i)=TCSwscar(0.5,0,initial2,0);
-initial2(8)=initial2(8)+1e-5;
-end
-figure(1);
-plot(kaprange,results(7,:),'b-',kaprange,resultsScar(7,:),'r-');
-legend('OmpRP','OmpRPwscar');
-xlabel('kap, s/-1');
-ylabel('OmpRP/\muM');
-
-figure(2);
-plot(linspace(0,50e-5,10),Varscar(7,:));
-xlabel('scaf,\muM');
-ylabel('OmpRP/\muM');
-% resultperOMPRP=results(7,:)./OmpRi.*100;
-% plot(kaprange,resultperOMPRP,'r-');
-% xlabel('kap, s/-1');
-% ylabel('OmpRP/\muM');
-
-if(surf1)
-mat=zeros(15,15);
-initial5=initial2;
-initial5(8)=scaf1;
-resultsn=zeros(15,15);
-kaprange2=linspace(kap1,kap2,15);
-kapplot=linspace(kap2,kap1,15);
-for i = 1:15
-%for loop
-for j = 1:15
-resultsn(:,j)=TCSwscar(kaprange2(j),0,initial5,0);
-end
-mat(i,:)=resultsn(7,:);
-initial5(8)=initial5(8)+((scaf2-scaf1)/14);
-end
-figure(4);
-x=linspace(scaf1,scaf2,15);
-mat
-
-mesh(x,kapplot,mat);
-ylabel('kap, s/-1');
-xlabel('scaf, \muM');
-zlabel('OmpRP,\muM');
-end
-
-
-
 else %if(time)
 resultSS=zeros(7,101);
 resultSSscaf=zeros(16,101);
@@ -167,14 +98,14 @@ end
 % for i=1:51
 % resultSS(:,i)=TCS(kaprangeSS(i),0,initialg,1,initial);
 % end
-resultanti(:,1)=TCSanti(kaprangeSS(1),0,initials,0,initialg);
-initialchange3=resultanti(:,1);
-for i=2:101
-% resultSS(:,i)=TCS(kaprangeSS(i),0,initial,1,initialchange);
-% initialchange=resultSS(:,i);
-resultanti(:,i)=TCSanti(kaprangeSS(i),0,initials,0,initialchange3);
-initialchange3=resultanti(:,i);
-end
+% resultanti(:,1)=TCSanti(kaprangeSS(1),0,initials,0,initialg);
+% initialchange3=resultanti(:,1);
+% for i=2:101
+% % resultSS(:,i)=TCS(kaprangeSS(i),0,initial,1,initialchange);
+% % initialchange=resultSS(:,i);
+% resultanti(:,i)=TCSanti(kaprangeSS(i),0,initials,0,initialchange3);
+% initialchange3=resultanti(:,i);
+% end
 fprintf('done TCS');
 
 %*************************************************
@@ -217,21 +148,6 @@ legend('OmpRP','OmpRP with scaffold','OmpRP+OmpRP.SC');
 xlabel('kap, s/-1');
 ylabel('OmpRP/\muM');
 
-scafrange=linspace(scaf1,scaf2,51);
-diffscaf=zeros(17,51);
-teminitial=initial2;
-% for i=1:51
-% teminitial(8)=scafrange(i); 
-% diffscaf(:,i)=TCSwscar(0.7,0,teminitial,0,initial2g);
-% end
-
-% figure(6);
-% plot(scafrange,diffscaf(7,:),'b-')
-% %resultSSscaf;
-% legend('OmpRP with scaffold');
-% xlabel('scaf, \muM');
-% ylabel('OmpRP/\muM');
-
 KC=20e-3;
 KF=1e-3;
 KF4=20e-3;
@@ -243,8 +159,8 @@ kdG=0.001;
 kdR=0.001;
 kdGm=1;
 kdRm=1;
-KdG=1e-2;
-KdR=1e-2;
+KdG=1e-3;
+KdR=1e-3;
 
 OmpRPn=resultSS(7,:);
 GFPmn=kC.*OmpRPn.^2./(OmpRPn.^2+KC.^2)./kdGm;
@@ -276,6 +192,13 @@ OmpRPf=resultSSscaf(7,:)+resultSSscaf(15,:);
 GFPSSF=kG.*kC.*OmpRPf.^2./(OmpRPf.^2+KC.^2)./kdG;
 RFPSSF=kR.*kF.*OmpRPf.^2./(OmpRPf.^2+KF.^2).*(1-(OmpRPf.^2./(OmpRPf.^2+KF4.^2)))./kdR;
 
+figure(6);
+%kaprangeSS,GFPSS,'g-',
+plot(kaprangeSS,RFPSS,'r-',kaprangeSS,GFPSS,'g-')
+legend('RFP','GFP');
+xlabel('kap/ s^{-1}');
+ylabel('Concentration/\muM');
+ 
 figure(7);
 plot(kaprangeSS,GFPSS,kaprangeSS,RFPSS,kaprangeSS,GFPSSF,kaprangeSS,RFPSSF);
 legend('GFP only TCS','RFP only TCS','GFP with scaffold','RFP with scaffold');
@@ -377,6 +300,11 @@ hold off;
 figure(18);
 plot(kaprangeSS,GFPanti2scaf,'g',kaprangeSS,RFPanti2scaf,'r');
 legend('GFP with anti2 & scaffold','RFP with anti2 & scaffold');
+xlabel('kap');
+ylabel('FP concentration');
+
+figure(25);
+plot(GFPanti2scaf,RFPanti2scaf);
 
 matGFPanti2scaf=[kaprangeSS;GFPanti2scaf'];
 matRFPanti2scaf=[kaprangeSS;RFPanti2scaf'];
@@ -393,5 +321,60 @@ plot(kaprangeSS,GFPanti2scaf,'g',kaprangeSS,RFPanti2scaf,'r',kaprangeSS,GFPSS,ka
 legend('GFP with anti2','RFP with anti2','GFP','RFP');
 
 end %if(time)
+
+%% anti2 with scaffold vary
+fprintf('now vary anti2 with scaffold');
+KFrange=linspace(1e-3,0.1,101);
+KF4range=linspace(1e-3,0.1,101);
+GFPK4=zeros(101,101);
+RFPK4=zeros(101,101);
+GFPKF=zeros(101,101);
+RFPKF=zeros(101,101);
+GFPK4sc=zeros(101,101);
+RFPK4sc=zeros(101,101);
+GFPKFsc=zeros(101,101);
+RFPKFsc=zeros(101,101);
+for i=1:101
+OmpRPc=resultSS(7,:);
+GFPK4(i,:)=kG.*kC.*OmpRPc.^2./(OmpRPc.^2+KC.^2)./kdG;
+RFPK4(i,:)=kR.*kF.*OmpRPc.^2./(OmpRPc.^2+KF.^2).*(1-(OmpRPc.^2./(OmpRPc.^2+KF4range(i).^2)))./kdR;
+
+GFPKF(i,:)=kG.*kC.*OmpRPc.^2./(OmpRPc.^2+KC.^2)./kdG;
+RFPKF(i,:)=kR.*kF.*OmpRPc.^2./(OmpRPc.^2+KFrange(i).^2).*(1-(OmpRPc.^2./(OmpRPc.^2+KF4.^2)))./kdR;
+
+OmpRPfc=resultSSscaf(7,:)+resultSSscaf(15,:);
+GFPK4sc(i,:)=kG.*kC.*OmpRPfc.^2./(OmpRPfc.^2+KC.^2)./kdG;
+RFPK4sc(i,:)=kR.*kF.*OmpRPfc.^2./(OmpRPfc.^2+KC.^2).*(1-(OmpRPfc.^2./(OmpRPfc.^2+KF4range(i).^2)))./kdR;
+
+GFPKFsc(i,:)=kG.*kC.*OmpRPfc.^2./(OmpRPfc.^2+KC.^2)./kdG;
+RFPKFsc(i,:)=kR.*kF.*OmpRPfc.^2./(OmpRPfc.^2+KFrange(i).^2).*(1-(OmpRPfc.^2./(OmpRPfc.^2+KF4.^2)))./kdR;
+count=i
+end
+
+figure(21);
+%kaprangeSS,RFPK4(2,:),kaprangeSS,RFPK4(50,:),kaprangeSS,RFPK4(101,:)
+plot(kaprangeSS,RFPK4');
+xlabel('Kap');
+ylabel('RFP Concentration without scaffold');
+%legend('low','medium','high');
+
+figure(22);
+%kaprangeSS,RFPKF(2,:),kaprangeSS,RFPKF(50,:),kaprangeSS,RFPKF(101,:)
+plot(kaprangeSS,RFPKF');
+xlabel('Kap');
+ylabel('RFP Concentration without scaffold');
+%legend('low','medium','high');
+
+figure(23);
+plot(kaprangeSS,RFPK4sc');
+xlabel('Kap');
+ylabel('RFP Concentration with scaffold');
+%legend('low','medium','high');
+
+figure(24);
+plot(kaprangeSS,RFPKFsc');
+xlabel('Kap');
+ylabel('RFP Concentration with scaffold');
+%legend('low','medium','high');
 end
 

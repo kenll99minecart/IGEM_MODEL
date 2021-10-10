@@ -1,6 +1,4 @@
-function Ans = TCSwscafd2(kap,showplot,initial)
-% important:  according to literature, EnvZ must be far greater than OmpR
-
+function x = testcase()
 %parameters goes here
 kad = 0.0001;%0.001
 kb1 = 0.5;
@@ -77,52 +75,65 @@ fdE=1e-3;
 fdO=1e-3;
 fpE=1e-4;
 fpO=1e-4;
-%kdScaf=1;
-% if(~SS)
-opt=odeset('RelTol',1e-5,'Events',@reachSS,'NonNegative',1);
-[tt, NN] = ode15s(@f,[0; tf], initial,opt);
-Ans=NN(end,:);
-% else
-% %guess=ones(1,17).*7;
-% ops=optimoptions(@fsolve,'FunctionTolerance',1e-10);
-% ops2=optimoptions(@lsqnonlin,'FunctionTolerance',1e-20,'MaxIterations',1e10,'MaxFunctionEvaluations',1e10,'StepTolerance',1e-30,'Algorithm','trust-region-reflective');
-% t=1000;
-% %Ans=fsolve(@(x) fSSscaf(t,x),initial,ops);,initial
-% [Ans,res]=lsqnonlin(@(x)fSSscaf(t,x),guess,zeros(1,17),[],ops2);
-% end
-
-
-if(showplot)
-hold on;
-figure(1);
-plot(tt,NN(:,1),tt,NN(:,2),tt,NN(:,3),tt,NN(:,4),tt,NN(:,5),tt,NN(:,6),tt,NN(:,7),tt,NN(:,8),tt,NN(:,9),tt,NN(:,10),tt,NN(:,11),tt,NN(:,12),tt,NN(:,13),tt,NN(:,14),tt,NN(:,15));
-xlabel('Time / s');
-ylabel('Number of moles/\muM');
- legend('EnvZ','EnvZP','EnvZP.OmpRP','EnvZ.OmpRP','EnvZ.OmpR','OmpR','OmpRP','Sc','ScEnvZ','ScEnvZP','ScEnvZPR','ScEnvZRP','ScEnvZR','ScOmpR','ScOmpRP');
-grid on;
-figure(2);
-plot(tt,NN(:,15));
-xlabel('Time / s');
-ylabel('Number of moles/\muM');
-legend('ScOmpRP');
-figure(3);
-plot(tt,NN(:,7));
-xlabel('Time / s');
-ylabel('Number of moles/\muM');
-legend('OmpRP');
-figure(4);
-plot(tt,NN(:,6));
-xlabel('Time / s');
-ylabel('Number of moles/\muM');
-legend('OmpR');
-figure(5);
-plot(tt,NN(:,7)+NN(:,15));
-xlabel('Time / s');
-ylabel('Number of moles/\muM');
-legend('OmpRP+ Sc.OmpRP');
-
-
-end
+%initial = [EnvZi;EnvZPi;EnvZPRi;EnvZRPi;EnvZRi;OmpRi;OmpRPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi;GFPi;RFPi];
+       ops2=optimoptions(@lsqnonlin,'FunctionTolerance',1e-10,'MaxIterations',1e10,'MaxFunctionEvaluations',1e10,'StepTolerance',1e-30);
+       [h,resnorm,residual,exitflag,output,lambda,jacobian] =lsqnonlin(@(x)f(0,x),ones(1,26).*1e2,zeros(1,26));%ones(1,17).*1
+       [k,resnorm2,residual2,exitflag2,output2,lambda2,jacobian2] =lsqnonlin(@(x)f(0,x),ones(1,26).*1,zeros(1,26));
+       
+       kaprangeSS=linspace(0,0.01,101);
+       RFPrange=linspace(0,100,101);
+       GFPrange=linspace(0,100,101);
+       [X,Y]=meshgrid(RFPrange,GFPrange);
+       RFPpt=h(25);
+       R=kfR.*RFPpt-kDR.*X;
+       G=
+       quiver(X,Y,
+       x=linspace(0,1000,50);
+       y=linspace(0,1000,50);
+       %[x,y]=meshgrid(0:10:101,0:10:101);
+       h=h';
+       k=k';
+       [U,V]=meshgrid(x,y);
+       U
+       V
+       h
+       k
+       size(V)
+       size(h)
+       t=0;
+       Gcood=zeros(50,50);
+       Rcood=zeros(50,50);
+       Gvec=zeros(50,50);
+       Rvec=zeros(50,50);
+       
+       for i=1:50
+           for j=1:50
+       w=([h(24),k(24);h(26),k(26)])\[x(i);y(j)];
+           omega=h*w(1)+k*w(2);
+           omega
+           Gcood(i,j)=x(i);
+           Rcood(i,j)=y(j);
+           mat=f(t,omega);
+           Gvec(i,j)=mat(24);
+           Rvec(i,j)=mat(26);
+           end
+       end
+       quiver(Gcood,Rcood,Gvec,Rvec);
+       h
+       k
+       x;
+       [V,ansf]=eig(full(jacobian));
+       ansf
+       opt=odeset('RelTol',1e-5,'NonNegative',1,'Events',@reachSS);%
+     tf=1000000;
+     resultsOmpRP=ones(1,200);
+     initialv=linspace(0,2e7,200);
+%      for i=1:200
+%      initial(6)=initialv(i);
+%      [tt, NN] = ode15s(@f, [0; tf], initial,opt);
+%     resultsOmpRP(i)=NN(end,7);
+%      end
+%      plot(initialv,resultsOmpRP);
     function dxdt=f(t,x)
         EnvZ=x(1);
         EnvZP=x(2);
@@ -158,9 +169,9 @@ end
         dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR-kbSH3.*Sc.*EnvZP+kdSH3.*ScEnvZP-kbSH3.*ScOmpR.*EnvZP+kdSH3.*ScEnvZPR;
         dEnvZPRdt=kb1.*EnvZP.*(OmpR.^2)-kd1.*EnvZPR-kpt.*EnvZPR;
         dEnvZRPdt=kpt.*EnvZPR-kd2.*EnvZRP+kb2.*EnvZ.*OmpRP-kph.*EnvZRP;
-        dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*(OmpR.^2)-kd3.*EnvZR;
+        dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*OmpR-kd3.*EnvZR;
         %dOmpRdt=-kb1.*EnvZP.*OmpR+kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
-        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+2.*kd3.*EnvZR-2.*kb3.*EnvZ.*(OmpR.^2)-kbLZ.*Sc.*OmpR+kdLZ.*ScOmpR-kbLZ.*ScEnvZ.*OmpR+kdLZ.*ScEnvZR-kbLZ.*ScEnvZP.*OmpR+kdLZ.*ScEnvZPR-fdO.*OmpR+fpO;
+        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR-kbLZ.*Sc.*OmpR+kdLZ.*ScOmpR-kbLZ.*ScEnvZ.*OmpR+kdLZ.*ScEnvZR-kbLZ.*ScEnvZP.*OmpR+kdLZ.*ScEnvZPR-fdO.*OmpR+fpO;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP-kbLZ.*Sc.*OmpRP+kdLZ.*ScOmpRP-kbLZ.*ScEnvZ.*OmpRP+kdLZ.*ScEnvZRP;
         OmpRPt=x(7)+x(15);
         dScdt=-kbSH3.*Sc.*EnvZ-kbSH3.*Sc.*EnvZP-kbLZ.*Sc.*OmpR-kbLZ.*Sc.*OmpRP+kdSH3.*ScEnvZ+kdSH3.*ScEnvZP+kdLZ.*ScOmpR+kdLZ.*ScOmpRP+kG.*kC.*OmpRPt.^2./(OmpRPt.^2+KC.^2)-kdScaf.*Sc;
@@ -191,11 +202,10 @@ end
 
     function [position, isterminal, direction] = reachSS(t, X)
       Changee=abs(f(t, X));
-      maxChange = max(Changee(1:15));
+      maxChange = max(Changee(1:7));
       %fprintf('SS \n');
       position = (maxChange < 1e-10) - 0.5;        
       isterminal = 1;        
       direction = 1;    
-    end 
+    end
 end
-

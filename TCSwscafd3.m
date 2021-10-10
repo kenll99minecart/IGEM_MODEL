@@ -1,4 +1,4 @@
-function Ans = TCSwscafd2(kap,showplot,initial)
+function Ans = TCSwscafd3(kap,showplot,initial)
 % important:  according to literature, EnvZ must be far greater than OmpR
 
 %parameters goes here
@@ -73,10 +73,14 @@ kfG=1e-2;
 kfR=1e-2;
 kGtl=1e-2;
 kRtl=1e-2;
-fdE=1e-3;
-fdO=1e-3;
-fpE=1e-4;
-fpO=1e-4;
+% fdE=1e-3;
+% fdO=1e-3;
+% fpE=1e-5;
+% fpO=1e-4;
+fdE=0;
+fdO=0;
+fpE=0;
+fpO=0;
 %kdScaf=1;
 % if(~SS)
 opt=odeset('RelTol',1e-5,'Events',@reachSS,'NonNegative',1);
@@ -153,23 +157,23 @@ end
         %GFP=x(16);
         %RFP=x(17);
         %TCS system
-        dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*OmpR-kbSH3.*Sc.*EnvZ+kdSH3.*ScEnvZ-kbSH3.*ScOmpR.*EnvZ+kdSH3.*ScEnvZR-kbSH3.*ScOmpRP.*EnvZ+kdSH3.*ScEnvZRP-kbSH3.*EnvZ+kdSH3.*EnvZD-fdE.*EnvZ+fpE;%new
+        dEnvZdt=-kap.*EnvZ+kad.*EnvZP+kd2.*EnvZRP-kb2.*EnvZ.*OmpRP+kd3.*EnvZR-kb3.*EnvZ.*(OmpR.^2)-kbSH3.*Sc.*EnvZ+kdSH3.*ScEnvZ-kbSH3.*ScOmpR.*EnvZ+kdSH3.*ScEnvZR-kbSH3.*ScOmpRP.*EnvZ+kdSH3.*ScEnvZRP-kbSH3.*EnvZ+kdSH3.*EnvZD-fdE.*EnvZ+fpE;%new
         dEnvZDdt=kbSH3.*EnvZ-kdSH3.*EnvZD;%new
-        dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR-kbSH3.*Sc.*EnvZP+kdSH3.*ScEnvZP-kbSH3.*ScOmpR.*EnvZP+kdSH3.*ScEnvZPR;
+        dEnvZPdt=kap.*EnvZ-kad.*EnvZP-kb1.*EnvZP.*(OmpR.^2)+kd1.*EnvZPR-kbSH3.*Sc.*EnvZP+kdSH3.*ScEnvZP-kbSH3.*(ScOmpR.^2).*EnvZP+kdSH3.*ScEnvZPR;
         dEnvZPRdt=kb1.*EnvZP.*(OmpR.^2)-kd1.*EnvZPR-kpt.*EnvZPR;
         dEnvZRPdt=kpt.*EnvZPR-kd2.*EnvZRP+kb2.*EnvZ.*OmpRP-kph.*EnvZRP;
         dEnvZRdt=kph.*EnvZRP+kb3.*EnvZ.*(OmpR.^2)-kd3.*EnvZR;
         %dOmpRdt=-kb1.*EnvZP.*OmpR+kd1.*EnvZPR+kd3.*EnvZR-kb3.*EnvZ.*OmpR;
-        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+2.*kd3.*EnvZR-2.*kb3.*EnvZ.*(OmpR.^2)-kbLZ.*Sc.*OmpR+kdLZ.*ScOmpR-kbLZ.*ScEnvZ.*OmpR+kdLZ.*ScEnvZR-kbLZ.*ScEnvZP.*OmpR+kdLZ.*ScEnvZPR-fdO.*OmpR+fpO;
+        dOmpRdt=-2.*kb1.*EnvZP.*(OmpR.^2)+2.*kd1.*EnvZPR+2.*kd3.*EnvZR-2.*kb3.*EnvZ.*(OmpR.^2)-kbLZ.*Sc.*OmpR+kdLZ.*ScOmpR-2.*kbLZ.*ScEnvZ.*(OmpR.^2)+2.*kdLZ.*ScEnvZR-2.*kbLZ.*ScEnvZP.*(OmpR.^2)+2.*kdLZ.*ScEnvZPR-fdO.*OmpR+fpO;
         dOmpRPdt=kd2.*EnvZRP-kb2.*EnvZ.*OmpRP-kbLZ.*Sc.*OmpRP+kdLZ.*ScOmpRP-kbLZ.*ScEnvZ.*OmpRP+kdLZ.*ScEnvZRP;
         OmpRPt=x(7)+x(15);
         dScdt=-kbSH3.*Sc.*EnvZ-kbSH3.*Sc.*EnvZP-kbLZ.*Sc.*OmpR-kbLZ.*Sc.*OmpRP+kdSH3.*ScEnvZ+kdSH3.*ScEnvZP+kdLZ.*ScOmpR+kdLZ.*ScOmpRP+kG.*kC.*OmpRPt.^2./(OmpRPt.^2+KC.^2)-kdScaf.*Sc;
-        dScEnvZdt=-kap2.*ScEnvZ+kad.*ScEnvZP+kbSH3.*Sc.*EnvZ-kdSH3.*ScEnvZ-kbLZ.*ScEnvZ.*OmpR+kdLZ.*ScEnvZR-kbLZ.*ScEnvZ.*OmpRP+kdLZ.*ScEnvZRP;
-        dScEnvZPdt=kap2.*ScEnvZ-kad.*ScEnvZP+kbSH3.*Sc.*EnvZP-kdSH3.*ScEnvZP-kbLZ.*ScEnvZP.*OmpR+kdLZ.*ScEnvZPR;
-        dScEnvZPRdt=kbLZ.*ScEnvZP.*OmpR-kdLZ.*ScEnvZPR+kbSH3.*ScOmpR.*EnvZP-kdSH3.*ScEnvZPR-kpt2.*ScEnvZPR;%+kap2.*ScEnvZR-kad.*ScEnvZPR;%new
+        dScEnvZdt=-kap2.*ScEnvZ+kad.*ScEnvZP+kbSH3.*Sc.*EnvZ-kdSH3.*ScEnvZ-kbLZ.*ScEnvZ.*(OmpR.^2)+kdLZ.*ScEnvZR-kbLZ.*ScEnvZ.*OmpRP+kdLZ.*ScEnvZRP;
+        dScEnvZPdt=kap2.*ScEnvZ-kad.*ScEnvZP+kbSH3.*Sc.*EnvZP-kdSH3.*ScEnvZP-kbLZ.*ScEnvZP.*(OmpR.^2)+kdLZ.*ScEnvZPR;
+        dScEnvZPRdt=kbLZ.*ScEnvZP.*(OmpR.^2)-kdLZ.*ScEnvZPR+kbSH3.*(ScOmpR.^2).*EnvZP-kdSH3.*ScEnvZPR-kpt2.*ScEnvZPR;%+kap2.*ScEnvZR-kad.*ScEnvZPR;%new
         dScEnvZRPdt=kbLZ.*ScEnvZ.*OmpRP-kdLZ.*ScEnvZRP+kbSH3.*ScOmpRP.*EnvZ-kdSH3.*ScEnvZRP+kpt2.*ScEnvZPR-kph.*ScEnvZRP;
-        dScEnvZRdt=kbLZ.*ScEnvZ.*OmpR-kdLZ.*ScEnvZR+kbSH3.*ScOmpR.*EnvZ-kdSH3.*ScEnvZR+kph.*ScEnvZRP;%-kap2.*ScEnvZR+kad.*ScEnvZPR;%new
-        dScOmpRdt=kbLZ.*Sc.*OmpR-kdLZ.*ScOmpR-kbSH3.*ScOmpR.*EnvZ+kdSH3.*ScEnvZR-kbSH3.*ScOmpR.*EnvZP+kdSH3.*ScEnvZPR;
+        dScEnvZRdt=kbLZ.*ScEnvZ.*(OmpR.^2)-kdLZ.*ScEnvZR+kbSH3.*(ScOmpR.^2).*EnvZ-kdSH3.*ScEnvZR+kph.*ScEnvZRP;%-kap2.*ScEnvZR+kad.*ScEnvZPR;%new
+        dScOmpRdt=kbLZ.*Sc.*OmpR-kdLZ.*ScOmpR-2.*kbSH3.*(ScOmpR.^2).*EnvZ+2.*kdSH3.*ScEnvZR-2.*kbSH3.*(ScOmpR.^2).*EnvZP+2.*kdSH3.*ScEnvZPR;
         dScOmpRPdt=kbLZ.*Sc.*OmpRP-kdLZ.*ScOmpRP-kbSH3.*ScOmpRP.*EnvZ+kdSH3.*ScEnvZRP;
         %dGFPdt=kG.*kC.*OmpRP.^2./(OmpRP.^2+KC.^2)-kdG.*GFP;
         %dRFPdt=kR.*kF.*OmpRP.^2./(OmpRP.^2+KF.^2).*(1-(OmpRP.^2./(OmpRP.^2+KF4.^2)))-kdR.*RFP;
