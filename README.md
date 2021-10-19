@@ -11,7 +11,7 @@ Kenll
 All files here are subjected to Creative Commons copyright licenses.
 Special thanks to NS to create a function to quickly find all intersection points in the function InterX.
 References:
-\n
+
 NS (2021). Curve intersections (https://www.mathworks.com/matlabcentral/fileexchange/22441-curve-intersections), MATLAB Central File Exchange.
-\n
+
 Saltelli, A., Tarantola, S., Campolongo, F., and Ratto, M. (2004). Sensitivity Analysis in Practice - A Guide to Assessing Scientific Models. Wiley.
